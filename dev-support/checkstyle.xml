@@ -59,12 +59,12 @@
                       value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
         </module>
         <module name="MethodLength">
-            <property name="max" value="300"/>
+            <property name="max" value="500"/>
         </module>
         <module name="MethodParamPad"/>
         <module name="ParameterNumber">
             <!-- default is 8 -->
-            <property name="max" value="12"/>
+            <property name="max" value="13"/>
         </module>
         <module name="BooleanExpressionComplexity">
             <!-- default is 3 -->

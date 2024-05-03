@@ -64,10 +64,10 @@ public class JdbcHiveInputBase extends HiveInputBase {
     private static final String DEFAULT_QUEUE = "default";
 
     public static class JdbcBaseBatchCubingInputSide extends BaseBatchCubingInputSide {
-        private IJdbcMetadata jdbcMetadataDialect;
+        protected IJdbcMetadata jdbcMetadataDialect;
         private DBConnConf dbconf;
         private SourceDialect dialect;
-        private final Map<String, String> metaMap = new TreeMap<>();
+        protected final Map<String, String> metaMap = new TreeMap<>();
 
         public JdbcBaseBatchCubingInputSide(IJoinedFlatTableDesc flatDesc, boolean skipCacheMeta) {
             super(flatDesc);
@@ -272,7 +272,7 @@ public class JdbcHiveInputBase extends HiveInputBase {
 
             String cmd = String.format(Locale.ROOT, "%s/bin/sqoop import" + generateSqoopConfigArgString()
                     + "--connect \"%s\" --driver %s --username %s --password \"%s\" --query \"%s AND \\$CONDITIONS\" "
-                    + "--target-dir %s/%s --split-by %s --boundary-query \"%s\" --null-string '%s' "
+                    + "--target-dir %s/%s --split-by \\\"%s\\\"  --boundary-query \"%s\" --null-string '%s' "
                     + "--null-non-string '%s' --fields-terminated-by '%s' --num-mappers %d", sqoopHome, connectionUrl,
                     driverClass, jdbcUser, jdbcPass, selectSql, jobWorkingDir, hiveTable, splitColumn, bquery,
                     sqoopNullString, sqoopNullNonString, filedDelimiter, mapperNum);
@@ -438,7 +438,7 @@ public class JdbcHiveInputBase extends HiveInputBase {
     /**
      * @return {TABLE_NAME}
      */
-    static String getTableIdentityQuoted(TableRef tableRef, Map<String, String> metaMap, IJdbcMetadata metadata,
+    protected static String getTableIdentityQuoted(TableRef tableRef, Map<String, String> metaMap, IJdbcMetadata metadata,
             boolean needQuote) {
         String value = fetchValue(tableRef.getTableDesc().getDatabase(), tableRef.getTableDesc().getName(), null,
                 metaMap);
@@ -469,7 +469,7 @@ public class JdbcHiveInputBase extends HiveInputBase {
     /**
      * @return {COLUMN_NAME}
      */
-    private static String getColumnIdentityQuoted(TblColRef tblColRef, IJdbcMetadata metadata,
+    protected static String getColumnIdentityQuoted(TblColRef tblColRef, IJdbcMetadata metadata,
             Map<String, String> metaMap, boolean needQuote) {
         String value = fetchValue(tblColRef.getTableRef().getTableDesc().getDatabase(),
                 tblColRef.getTableRef().getTableDesc().getName(), tblColRef.getName(), metaMap);

@@ -45,7 +45,7 @@ public class JdbcHiveInputBase extends org.apache.kylin.source.jdbc.JdbcHiveInpu
         private final JdbcConnector dataSource;
 
         public JDBCBaseBatchCubingInputSide(IJoinedFlatTableDesc flatDesc, JdbcConnector dataSource) {
-            super(flatDesc, true);
+            super(flatDesc, false);
             this.dataSource = dataSource;
         }
 
@@ -77,15 +77,8 @@ public class JdbcHiveInputBase extends org.apache.kylin.source.jdbc.JdbcHiveInpu
             splitTableAlias = splitColRef.getTableAlias();
             splitDatabase = splitColRef.getColumnDesc().getTable().getDatabase();
 
-            if (enableQuote) {
-                splitColumn = sqlDialect.quoteIdentifier(splitColRef.getTableAlias()) + "."
-                        + sqlDialect.quoteIdentifier(splitColRef.getName());
-                splitDatabase = sqlDialect.quoteIdentifier(splitDatabase);
-                splitTable = sqlDialect.quoteIdentifier(splitTable);
-                splitTableAlias = sqlDialect.quoteIdentifier(splitTableAlias);
-            } else {
-                splitColumn = splitColRef.getTableAlias() + "." + splitColRef.getName();
-            }
+            splitColumn = getTableIdentityQuoted(splitColRef.getTableRef(),  metaMap, jdbcMetadataDialect, true) + "."
+                        + getColumnIdentityQuoted(splitColRef, jdbcMetadataDialect, metaMap, true);
 
             String selectSql = JoinedFlatTable.generateSelectDataStatement(flatDesc, true, new String[]{partCol}, sqlDialect);
             selectSql = escapeQuotationInSql(dataSource.convertSql(selectSql));
@@ -114,10 +107,11 @@ public class JdbcHiveInputBase extends org.apache.kylin.source.jdbc.JdbcHiveInpu
             }
 
             bquery = escapeQuotationInSql(bquery);
-            splitColumn = escapeQuotationInSql(splitColumn);
+            splitColumn = escapeQuotationInSql(dataSource.convertColumn(splitColumn,""));
+
             String cmd = StringUtils.format(
                     "--connect \"%s\" --driver \"%s\" --username \"%s\" --password \"%s\" --query \"%s AND \\$CONDITIONS\" "
-                            + "--target-dir \"%s/%s\" --split-by \"%s\" --boundary-query \"%s\" --null-string '' "
+                            + "--target-dir \"%s/%s\" --split-by \\\"%s\\\"  --boundary-query \"%s\" --null-string '' "
                             + "--fields-terminated-by '%s' --num-mappers %d",
                     dataSource.getJdbcUrl(), dataSource.getJdbcDriver(), dataSource.getJdbcUser(),
                     dataSource.getJdbcPassword(), selectSql, jobWorkingDir, hiveTable, splitColumn, bquery,
