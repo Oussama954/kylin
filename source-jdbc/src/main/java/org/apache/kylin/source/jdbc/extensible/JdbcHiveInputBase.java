@@ -45,7 +45,7 @@ public class JdbcHiveInputBase extends org.apache.kylin.source.jdbc.JdbcHiveInpu
         private final JdbcConnector dataSource;
 
         public JDBCBaseBatchCubingInputSide(IJoinedFlatTableDesc flatDesc, JdbcConnector dataSource) {
-            super(flatDesc, false);
+            super(flatDesc, true);
             this.dataSource = dataSource;
         }
 
@@ -77,8 +77,8 @@ public class JdbcHiveInputBase extends org.apache.kylin.source.jdbc.JdbcHiveInpu
             splitTableAlias = splitColRef.getTableAlias();
             splitDatabase = splitColRef.getColumnDesc().getTable().getDatabase();
 
-            splitColumn = getTableIdentityQuoted(splitColRef.getTableRef(),  metaMap, jdbcMetadataDialect, true) + "."
-                        + getColumnIdentityQuoted(splitColRef, jdbcMetadataDialect, metaMap, true);
+            splitColumn = getTableIdentityQuoted(splitColRef.getTableRef(),  metaMap, jdbcMetadataDialect, false) + "."
+                        + getColumnIdentityQuoted(splitColRef, jdbcMetadataDialect, metaMap, false);
 
             String selectSql = JoinedFlatTable.generateSelectDataStatement(flatDesc, true, new String[]{partCol}, sqlDialect);
             selectSql = escapeQuotationInSql(dataSource.convertSql(selectSql));
